@@ -9,7 +9,6 @@ import java.sql.DriverManager;
 public class Main {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		String dbName="derbyDemo";
 		String connectionURL = "jdbc:derby:" + dbName + ";";
@@ -28,14 +27,19 @@ public class Main {
 		String answer;
 
 		try {
+		  //try connecting to existing DB 
 			conn = connectToExistingDB(connectionURL);
 			if (conn == null) {
+			  //if that doesn't work, creat the database
 				System.out.println(dbName + " does not exist, creating ...");
 				conn = DriverManager.getConnection(creationURL);
 				
+				//and set up the table
 				s = conn.createStatement();
 				s.execute(createTableString);				
 			}
+			
+			//now we should have a database and a table structure
 			System.out.println("Connected to database: " + dbName);
 			chk4Table(conn);
 			System.out.println("WISH_LIST table OK");
