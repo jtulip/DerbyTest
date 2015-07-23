@@ -25,11 +25,12 @@ public class Main {
 		PreparedStatement psInsert = null;
 		ResultSet myWishes;
 		
-		String createTableString = "CREATE TABLE WISH_LIST " 
-		                    + "(WISH_ID INT NOT NULL GENERATED ALWAYS AS IDENTITY"
-		                    + " CONSTRAINT WISH_PK PRIMARY KEY, "
-		                    + " ENTRY_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-		                    + " WISH_ITEM VARCHAR(32) NOT NULL)";
+		String createTableString = "CREATE TABLE WISH_LIST" 
+		                    + " (WISH_ID INT NOT NULL GENERATED ALWAYS AS IDENTITY"
+		                    + " CONSTRAINT WISH_PK PRIMARY KEY,"
+		                    + " ENTRY_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+		                    + " WISH_ITEM VARCHAR(32) NOT NULL, "
+		                    + " WISH_DESC VARCHAR(32))";
 
 		try {
 		  // try connecting to existing DB 
@@ -48,11 +49,11 @@ public class Main {
         s.execute(createTableString);               
       }
       System.out.println("WISH_LIST table OK");
-      
+/**
 			// now we should have a valid database and table structure
 			
 			// setup the prepared statement
-			psInsert = conn.prepareStatement("INSERT INTO WISH_LIST(WISH_ITEM) VALUES (?)");
+			psInsert = conn.prepareStatement("INSERT INTO WISH_LIST(WISH_ITEM, WISH_DESC) VALUES (?, ?)");
 			
 			// now run the add/list record loop
 			String answer ="";
@@ -79,9 +80,10 @@ public class Main {
         System.out.println("--------------------------------------");
 			  myWishes.close();
 			}
+**/
 			// clean up
       System.out.println("Exiting.");
-			psInsert.close();
+			//psInsert.close();
 			s.close();
 			conn.close();
 			
