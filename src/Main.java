@@ -11,6 +11,13 @@ import java.sql.DriverManager;
 import java.sql.Timestamp;
 
 public class Main {
+	
+	private static PreparedStatement psCreate = null;
+	private static PreparedStatement psRead = null;
+	private static PreparedStatement psUpdate = null;
+	private static PreparedStatement psDelete = null;
+	private static PreparedStatement psList = null;
+
 
 	public static void main(String[] args) {
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
@@ -20,11 +27,6 @@ public class Main {
 
 		Connection conn = null;
 		Statement s = null;
-		PreparedStatement psCreate = null;
-		PreparedStatement psRead = null;
-		PreparedStatement psUpdate = null;
-		PreparedStatement psDelete = null;
-		PreparedStatement psList = null;
 		ResultSet rs;
 
 		String createTableString = "CREATE TABLE WISH_LIST" + " (WISH_ID INT NOT NULL GENERATED ALWAYS AS IDENTITY"
@@ -53,8 +55,9 @@ public class Main {
 
 			// setup the prepared statements
 			psCreate = conn.prepareStatement("INSERT INTO WISH_LIST(WISH_ITEM, WISH_DESC) VALUES (?, ?)");
-			psRead = conn.prepareStatement("SELECT * FROM WISH_LIST WHERE WISH_ITEM='?'");
+			psRead = conn.prepareStatement("SELECT * FROM WISH_LIST WHERE WISH_ID=?");
 			psList = conn.prepareStatement("SELECT * FROM WISH_LIST");
+			
 			String menu = 	"\n    Enter selection: \n" + 
 							"         C - create a new record\n" + 
 							"         R - read a record\n" + 
@@ -66,10 +69,8 @@ public class Main {
 
 			// now run the add/list record loop
 			String answer = "";
-			while (!answer.equals("q")) {
+			while (!answer.equals("q")) {				
 				answer = getInput(menu);
-				if (answer.equals("q"))
-					break;
 
 				switch (answer) {
 
@@ -124,12 +125,34 @@ public class Main {
 		}
 	}
 
-	private static void createRecord(Statement s) {
+	private static void createRecord(Statement s) throws IOException, SQLException {
 		System.out.println("Creating Record");
+		String item = getInput("Enter wish item: ");
+		String desc = getInput("Enter wish description: ");
+		
+		psCreate.setString(1,item);
+		psCreate.setString(2,desc);
+		psCreate.executeUpdate();		
 	}
 
-	private static void readRecord(Statement s) {
+	private static void readRecord(Statement s) throws IOException, SQLException {
+		//psRead = conn.prepareStatement("SELECT * FROM WISH_LIST WHERE WISH_ID='?'");
 		System.out.println("Reading Record");
+		int wishId = new Integer(getInput("Enter wish item id: ")).intValue();
+		psRead.setInt(1, wishId);
+		ResultSet rs = psRead.executeQuery();
+		
+		while (rs.next()) {
+			int wishId2 = rs.getInt(1);
+			String item = rs.getString(3);
+			String desc = rs.getString(4);
+
+			System.out.println("Id: " + wishId2 + " | " + item + " | " + desc);
+		}
+		rs.close();
+		
+		
+		
 	}
 
 	private static void updateRecord(Statement s) {
@@ -142,13 +165,14 @@ public class Main {
 
 	private static void listRecords(Statement s) throws SQLException {
 		System.out.println("Listing Records");
-		ResultSet rs = s.executeQuery("SELECT * FROM WISH_LIST");
+		ResultSet rs = psList.executeQuery();
 		while (rs.next()) {
-			Timestamp dateTime = rs.getTimestamp(2);
+			int wishId = rs.getInt(1);
+			//Timestamp dateTime = rs.getTimestamp(2);
 			String item = rs.getString(3);
 			String desc = rs.getString(4);
 
-			System.out.println("On " + dateTime + " I wished for a " + desc + " " + item);
+			System.out.println("Id: " + wishId + " | " + item + " | " + desc);
 		}
 		rs.close();
 	}
