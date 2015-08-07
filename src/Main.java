@@ -8,7 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.DriverManager;
-import java.sql.Timestamp;
+//import java.sql.Timestamp;
 
 public class Main {
 	
@@ -17,22 +17,31 @@ public class Main {
 	private static PreparedStatement psUpdate = null;
 	private static PreparedStatement psDelete = null;
 	private static PreparedStatement psList = null;
+	private static PreparedStatement psFind = null;
+	
+	private static String createStr = "INSERT INTO WISH_LIST(WISH_ITEM, WISH_DESC) VALUES (?, ?)";
+	private static String readStr   = "SELECT * FROM WISH_LIST WHERE WISH_ID=?";
+	private static String updateStr = "UPDATE WISH_LIST SET WISH_DESC=? WHERE WISH_ID=?";
+	private static String deleteStr = "DELETE FROM WISH_LIST WHERE WISH_ID=?";
+	private static String listStr   = "SELECT * FROM WISH_LIST";
+	private static String findStr   = "SELECT * FROM WISH_LIST WHERE WISH_ITEM=?";
+	
+	private static String createTableString = " CREATE TABLE WISH_LIST" + 
+	                                          " (WISH_ID INT NOT NULL GENERATED ALWAYS AS IDENTITY" +
+			                                  " CONSTRAINT WISH_PK PRIMARY KEY," + 
+	                                          " ENTRY_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+			                                  " WISH_ITEM VARCHAR(32) NOT NULL, " + 
+	                                          " WISH_DESC VARCHAR(32))";
 
 
 	public static void main(String[] args) {
-		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+		//String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		String dbName = "derbyDemo";
 		String connectionURL = "jdbc:derby:" + dbName + ";";
 		String creationURL = "jdbc:derby:" + dbName + ";create=true";
 
 		Connection conn = null;
 		Statement s = null;
-		ResultSet rs;
-
-		String createTableString = "CREATE TABLE WISH_LIST" + " (WISH_ID INT NOT NULL GENERATED ALWAYS AS IDENTITY"
-				+ " CONSTRAINT WISH_PK PRIMARY KEY," + " ENTRY_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
-				+ " WISH_ITEM VARCHAR(32) NOT NULL, " + " WISH_DESC VARCHAR(32))";
-
 		try {
 			// try connecting to existing DB
 			conn = connectToExistingDB(connectionURL);
@@ -42,21 +51,25 @@ public class Main {
 				conn = DriverManager.getConnection(creationURL);
 			}
 			System.out.println("Connected to database: " + dbName);
-			s = conn.createStatement();
 
 			// check for valid table
 			if (!chk4Table(conn)) {
 				// and set it up if it doesn't exit
+				s = conn.createStatement();
 				s.execute(createTableString);
+				s.close();
 			}
 			System.out.println("WISH_LIST table OK");
 
 			// now we should have a valid database and table structure
 
 			// setup the prepared statements
-			psCreate = conn.prepareStatement("INSERT INTO WISH_LIST(WISH_ITEM, WISH_DESC) VALUES (?, ?)");
-			psRead = conn.prepareStatement("SELECT * FROM WISH_LIST WHERE WISH_ID=?");
-			psList = conn.prepareStatement("SELECT * FROM WISH_LIST");
+			psCreate = conn.prepareStatement(createStr);
+			psRead = conn.prepareStatement(readStr);
+			psUpdate = conn.prepareStatement(updateStr);
+			psDelete = conn.prepareStatement(deleteStr);
+			psList = conn.prepareStatement(listStr);
+			psFind = conn.prepareStatement(findStr);
 			
 			String menu = 	"\n    Enter selection: \n" + 
 							"         C - create a new record\n" + 
@@ -64,6 +77,7 @@ public class Main {
 							"         U - update a record\n" + 
 							"         D - delete a  record\n" + 
 							"         L - list all records\n\n" + 
+							"         F - find records by item\n\n" + 
 							"         Q - quits\n\n" +
 							"     Selection: ";
 
@@ -76,23 +90,27 @@ public class Main {
 
 				case "c":
 				case "C":
-					createRecord(s);
+					createRecord();
 					break;
 				case "r":
 				case "R":
-					readRecord(s);
+					readRecord();
 					break;
 				case "u":
 				case "U":
-					updateRecord(s);
+					updateRecord();
 					break;
 				case "d":
 				case "D":
-					deleteRecord(s);
+					deleteRecord();
 					break;
 				case "l":
 				case "L":
-					listRecords(s);
+					listRecords();
+					break;
+				case "f":
+				case "F":
+					findRecordsByItem();
 					break;
 				case "q":
 				case "Q":
@@ -106,7 +124,6 @@ public class Main {
 			// clean up
 			System.out.println("Exiting.");
 			// psInsert.close();
-			s.close();
 			conn.close();
 
 			// shut down derby (only for embedded mode)
@@ -125,7 +142,8 @@ public class Main {
 		}
 	}
 
-	private static void createRecord(Statement s) throws IOException, SQLException {
+
+	private static void createRecord() throws IOException, SQLException {
 		System.out.println("Creating Record");
 		String item = getInput("Enter wish item: ");
 		String desc = getInput("Enter wish description: ");
@@ -135,7 +153,8 @@ public class Main {
 		psCreate.executeUpdate();		
 	}
 
-	private static void readRecord(Statement s) throws IOException, SQLException {
+	
+	private static void readRecord() throws IOException, SQLException {
 		//psRead = conn.prepareStatement("SELECT * FROM WISH_LIST WHERE WISH_ID='?'");
 		System.out.println("Reading Record");
 		int wishId = new Integer(getInput("Enter wish item id: ")).intValue();
@@ -150,20 +169,29 @@ public class Main {
 			System.out.println("Id: " + wishId2 + " | " + item + " | " + desc);
 		}
 		rs.close();
-		
-		
-		
 	}
-
-	private static void updateRecord(Statement s) {
+	
+	
+	private static void updateRecord() throws IOException, SQLException {
 		System.out.println("Updating Record");
+		int wishId = new Integer(getInput("Enter wish item id: ")).intValue();
+		String newDesc = getInput("Enter new description: ");
+		
+		psUpdate.setString(1, newDesc);
+		psUpdate.setInt(2, wishId);
+		psUpdate.executeUpdate();				
 	}
 
-	private static void deleteRecord(Statement s) {
+	private static void deleteRecord() throws IOException, SQLException {
 		System.out.println("Deleting Record");
+		int wishId = new Integer(getInput("Enter wish item id: ")).intValue();
+		
+		psDelete.setInt(1, wishId);
+		psDelete.executeUpdate();				
 	}
 
-	private static void listRecords(Statement s) throws SQLException {
+
+	private static void listRecords() throws SQLException {
 		System.out.println("Listing Records");
 		ResultSet rs = psList.executeQuery();
 		while (rs.next()) {
@@ -177,6 +205,40 @@ public class Main {
 		rs.close();
 	}
 
+	private static void findRecordsByItem() throws IOException, SQLException {
+		System.out.println("Finding Records");
+		String itemStr = getInput("Enter wish item: ");
+		psFind.setString(1, itemStr);
+		
+		ResultSet rs = psFind.executeQuery();
+		while (rs.next()) {
+			int wishId = rs.getInt(1);
+			//Timestamp dateTime = rs.getTimestamp(2);
+			String item = rs.getString(3);
+			String desc = rs.getString(4);
+
+			System.out.println("Id: " + wishId + " | " + item + " | " + desc);
+		}
+		rs.close();
+	}
+
+
+	private static String getInput(String prompt) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String ans = "";
+		try {
+			while (ans.length() == 0) {
+				System.out.print(prompt);
+				ans = br.readLine().trim();
+			}
+		} catch (IOException ioe) {
+			System.err.println("Could not read from System.in");
+			throw ioe;
+		}
+		return ans;
+	}
+
+	
 	private static Connection connectToExistingDB(String connectionURL) throws SQLException {
 		Connection conn = null;
 		try {
@@ -189,6 +251,7 @@ public class Main {
 		return conn;
 	}
 
+	
 	private static boolean chk4Table(Connection conn) throws SQLException {
 		try {
 			Statement s = conn.createStatement();
@@ -210,20 +273,6 @@ public class Main {
 		}
 		return true;
 	}
-
-	private static String getInput(String prompt) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		String ans = "";
-		try {
-			while (ans.length() == 0) {
-				System.out.print(prompt);
-				ans = br.readLine().trim();
-			}
-		} catch (IOException ioe) {
-			System.err.println("Could not read from System.in");
-			throw ioe;
-		}
-		return ans;
-	}
+	
 
 }
