@@ -12,6 +12,9 @@ import java.sql.DriverManager;
 
 public class Main {
 	
+	private static String dbName = "derbyDemo";
+	private static String connectionURL = "jdbc:derby:" + dbName + ";";
+
 	private static PreparedStatement psCreate = null;
 	private static PreparedStatement psRead = null;
 	private static PreparedStatement psUpdate = null;
@@ -36,29 +39,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		//String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-		String dbName = "derbyDemo";
-		String connectionURL = "jdbc:derby:" + dbName + ";";
-		String creationURL = "jdbc:derby:" + dbName + ";create=true";
 
-		Connection conn = null;
-		Statement s = null;
-		try {
-			// try connecting to existing DB
-			conn = connectToExistingDB(connectionURL);
-			if (conn == null) {
-				// if that doesn't work, create the database
-				System.out.println(dbName + " does not exist, creating ...");
-				conn = DriverManager.getConnection(creationURL);
-			}
-			System.out.println("Connected to database: " + dbName);
-
-			// check for valid table
-			if (!chk4Table(conn)) {
-				// and set it up if it doesn't exit
-				s = conn.createStatement();
-				s.execute(createTableString);
-				s.close();
-			}
+		try (Connection conn = getValidDBConnection();) {
 			System.out.println("WISH_LIST table OK");
 
 			// now we should have a valid database and table structure
@@ -123,20 +105,21 @@ public class Main {
 
 			// clean up
 			System.out.println("Exiting.");
-			// psInsert.close();
 			conn.close();
 
 			// shut down derby (only for embedded mode)
 			try {
 				DriverManager.getConnection("jdbc:derby:;shutdown=true");
-			} catch (SQLException sqle) {
+			} 
+			catch (SQLException sqle) {
 				if (!sqle.getSQLState().equals("XJ015")) {
 					System.err.println("DB did not shutdown normally");
 				} else {
 					System.out.println("DB shutdown normally");
 				}
 			}
-		} catch (Throwable e) {
+		} 
+		catch (Throwable e) {
 			System.err.println(". . . Exception thrown:" + e);
 			e.printStackTrace(System.err);
 		}
@@ -155,20 +138,19 @@ public class Main {
 
 	
 	private static void readRecord() throws IOException, SQLException {
-		//psRead = conn.prepareStatement("SELECT * FROM WISH_LIST WHERE WISH_ID='?'");
 		System.out.println("Reading Record");
 		int wishId = new Integer(getInput("Enter wish item id: ")).intValue();
 		psRead.setInt(1, wishId);
-		ResultSet rs = psRead.executeQuery();
 		
-		while (rs.next()) {
-			int wishId2 = rs.getInt(1);
-			String item = rs.getString(3);
-			String desc = rs.getString(4);
-
-			System.out.println("Id: " + wishId2 + " | " + item + " | " + desc);
+		try (ResultSet rs = psRead.executeQuery();) {
+			while (rs.next()) {
+				int wishId2 = rs.getInt(1);
+				String item = rs.getString(3);
+				String desc = rs.getString(4);
+	
+				System.out.println("Id: " + wishId2 + " | " + item + " | " + desc);
+			}
 		}
-		rs.close();
 	}
 	
 	
@@ -193,16 +175,16 @@ public class Main {
 
 	private static void listRecords() throws SQLException {
 		System.out.println("Listing Records");
-		ResultSet rs = psList.executeQuery();
-		while (rs.next()) {
-			int wishId = rs.getInt(1);
-			//Timestamp dateTime = rs.getTimestamp(2);
-			String item = rs.getString(3);
-			String desc = rs.getString(4);
-
-			System.out.println("Id: " + wishId + " | " + item + " | " + desc);
+		try (ResultSet rs = psList.executeQuery();) {
+			while (rs.next()) {
+				int wishId = rs.getInt(1);
+				//Timestamp dateTime = rs.getTimestamp(2);
+				String item = rs.getString(3);
+				String desc = rs.getString(4);
+	
+				System.out.println("Id: " + wishId + " | " + item + " | " + desc);
+			}
 		}
-		rs.close();
 	}
 
 	private static void findRecordsByItem() throws IOException, SQLException {
@@ -210,16 +192,16 @@ public class Main {
 		String itemStr = getInput("Enter wish item: ");
 		psFind.setString(1, itemStr);
 		
-		ResultSet rs = psFind.executeQuery();
-		while (rs.next()) {
-			int wishId = rs.getInt(1);
-			//Timestamp dateTime = rs.getTimestamp(2);
-			String item = rs.getString(3);
-			String desc = rs.getString(4);
-
-			System.out.println("Id: " + wishId + " | " + item + " | " + desc);
+		try (ResultSet rs = psFind.executeQuery();) {
+			while (rs.next()) {
+				int wishId = rs.getInt(1);
+				//Timestamp dateTime = rs.getTimestamp(2);
+				String item = rs.getString(3);
+				String desc = rs.getString(4);
+	
+				System.out.println("Id: " + wishId + " | " + item + " | " + desc);
+			}
 		}
-		rs.close();
 	}
 
 
@@ -238,6 +220,28 @@ public class Main {
 		return ans;
 	}
 
+
+	private static Connection getValidDBConnection() throws SQLException {
+		// try connecting to existing DB
+		Connection conn = connectToExistingDB(connectionURL);
+		
+		// if that doesn't work, create the database
+		if (conn == null) {
+			System.out.println(dbName + " does not exist, creating ...");
+			conn = DriverManager.getConnection(connectionURL + "create=true");
+		}
+		System.out.println("Connected to database: " + dbName);
+
+		// check for valid table
+		try (Statement s = conn.createStatement();) {
+			if (!chk4Table(conn)) {
+				// and set it up if it doesn't exit
+				s.execute(createTableString);
+			}
+		}
+		return conn;
+	}
+	
 	
 	private static Connection connectToExistingDB(String connectionURL) throws SQLException {
 		Connection conn = null;
