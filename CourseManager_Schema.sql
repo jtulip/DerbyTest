@@ -5,8 +5,8 @@ AUTOCOMMIT OFF;
 CREATE TABLE Students
 	( 
 		StudentId integer NOT NULL,
-		FirstName varchar(255) NOT NULL,
-		LastName  varchar(255) NOT NULL
+		FirstName varchar(32) NOT NULL,
+		LastName  varchar(32) NOT NULL
 	);
 ALTER TABLE Students
 	ADD CONSTRAINT pk_Students PRIMARY KEY (StudentId);
@@ -16,7 +16,7 @@ ALTER TABLE Students
 CREATE TABLE Subjects
 	(
 		SubjectCode character(6) NOT NULL,
-		SubjectName varchar(255) NOT NULL
+		SubjectName varchar(32) NOT NULL
 	);
 
 ALTER TABLE Subjects
