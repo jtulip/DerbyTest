@@ -57,3 +57,9 @@ ALTER TABLE Marks
 	
 COMMIT;
 	
+-- \* Setup test data *\
+
+INSERT INTO Subjects VALUES ('ITC203','OOSAD'), ('ITC205','PPP');
+INSERT INTO Students VALUES (1,'Jim', 'Brown'), (2, 'Jack', 'Black'), (3, 'Mary', 'Contrary');
+
+COMMIT;
