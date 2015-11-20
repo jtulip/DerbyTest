@@ -30,27 +30,33 @@ public class Recreate {
             System.out.println("---------------------------------------");                    
             try  {
                 infile = new File(fileName);
-                scanner = new Scanner(infile).useDelimiter(delimiter); 
+                scanner = new Scanner(infile).useDelimiter("\n"); 
+                StringBuilder builder = new StringBuilder();
                 while (scanner.hasNext()) {
                     String s = scanner.next().trim();
                     if (!s.startsWith("--") || s.length() == 0) {
-                        System.out.println(s);                    
-                        System.out.println("---------------------------------------");                      
-                        Statement statement = null;
-                        try {
-                            statement = conn.createStatement();
-                            statement.execute(s);
-                        }
-                        catch (SQLException e) {
-                            e.printStackTrace();
-                            return;                            
-                        }
-                        finally {
-                            statement.close();
+                        builder.append(" ").append(s);
+                        if (builder.toString().endsWith(delimiter)) {
+                            String raw = builder.toString().split(delimiter)[0].trim();
+                            System.out.println(raw + "\n----------------------------------\n");
+                            Statement statement = null;
+                            try {
+                                statement = conn.createStatement();
+                                statement.execute(raw);
+                                builder.setLength(0);
+                            }
+                            catch (SQLException e) {
+                                e.printStackTrace();
+                                return;                            
+                            }
+                            finally {
+                                statement.close();
+                            }
                         }
                     }
                 }
-                
+                System.out.println("Finished");
+                                
                 
             }
             catch (FileNotFoundException e) {

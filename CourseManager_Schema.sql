@@ -1,12 +1,18 @@
+-- /* Create Students table */
+
 CREATE TABLE Students
 	( 
 		StudentId integer NOT NULL,
 		FirstName varchar(32) NOT NULL,
 		LastName  varchar(32) NOT NULL
 	);
+	
 ALTER TABLE Students
 	ADD CONSTRAINT pk_Students PRIMARY KEY (StudentId);
 
+
+
+-- /* Create Subjects table */
 
 CREATE TABLE Subjects
 	(
@@ -17,6 +23,9 @@ ALTER TABLE Subjects
 	ADD CONSTRAINT pk_Subjects PRIMARY KEY (SubjectCode);
 
 	
+
+-- /* Create Enrolments table */
+
 CREATE TABLE Enrolments
 	(
 		SubjectCode character(6) NOT NULL,
@@ -26,6 +35,9 @@ ALTER TABLE Enrolments
 	ADD CONSTRAINT pk_Enrolments PRIMARY KEY (SubjectCode, StudentId);
 
 	
+
+-- /* Create Assessments table */
+
 CREATE TABLE Assessments
 	(
 		SubjectCode character(6) NOT NULL,
@@ -37,6 +49,9 @@ ALTER TABLE Assessments
 ALTER TABLE Assessments
 	ADD CONSTRAINT Subjects_fk FOREIGN KEY (SubjectCode) REFERENCES Subjects (SubjectCode);
 
+
+
+-- /* Create Marks table */
 
 CREATE TABLE Marks
 	(
@@ -52,6 +67,9 @@ ALTER TABLE Marks
 ALTER TABLE Marks
 	ADD CONSTRAINT Assessments_fk FOREIGN KEY (SubjectCode, AssessmentCode) 
 		REFERENCES Assessments (SubjectCode, AssessmentCode);
+
+
+-- /* Insert test data */
 
 INSERT INTO Subjects VALUES 
 	('ITC203','OOSAD'), 
