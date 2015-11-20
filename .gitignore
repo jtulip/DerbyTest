@@ -3,5 +3,6 @@
 .settings/
 bin/
 derby.log
+server.log
 derbyDemo/
 CourseManager/

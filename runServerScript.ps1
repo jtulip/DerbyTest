@@ -1,0 +1,1 @@
+Start-Job -ScriptBlock {java -jar $env:DERBY_HOME\lib\derbyrun.jar server start} > server.log
