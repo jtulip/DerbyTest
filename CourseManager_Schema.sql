@@ -33,6 +33,10 @@ CREATE TABLE Enrolments
 	);
 ALTER TABLE Enrolments
 	ADD CONSTRAINT pk_Enrolments PRIMARY KEY (SubjectCode, StudentId);
+ALTER TABLE Enrolments
+	ADD CONSTRAINT Enrol_Subjects_fk FOREIGN KEY (SubjectCode) REFERENCES Subjects (SubjectCode);
+ALTER TABLE Enrolments
+	ADD CONSTRAINT Enrol_Students_fk FOREIGN KEY (StudentId) REFERENCES Students (StudentId);
 
 	
 
@@ -47,7 +51,7 @@ CREATE TABLE Assessments
 ALTER TABLE Assessments
 	ADD CONSTRAINT pk_Assessments PRIMARY KEY (SubjectCode, AssessmentCode);
 ALTER TABLE Assessments
-	ADD CONSTRAINT Subjects_fk FOREIGN KEY (SubjectCode) REFERENCES Subjects (SubjectCode);
+	ADD CONSTRAINT Assess_Subjects_fk FOREIGN KEY (SubjectCode) REFERENCES Subjects (SubjectCode);
 
 
 
@@ -79,3 +83,11 @@ INSERT INTO Students VALUES
 	(1,'Jim', 'Brown'), 
 	(2, 'Jack', 'Black'), 
 	(3, 'Mary', 'Contrary');
+	
+INSERT INTO Enrolments VALUES 
+	('ITC203',1), 
+	('ITC203',3), 
+	('ITC205',2),
+	('ITC205',3);
+	
+

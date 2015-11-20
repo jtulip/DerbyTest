@@ -34,6 +34,9 @@ public class MainMenu {
                     case "U": SubjectMenu.execute(ds, in);
                     break;  
           
+                    case "E": EnrolmentMenu.execute(ds, in);
+                    break;  
+          
                     case "Q": stop = true;
                               break;
                               
@@ -53,6 +56,7 @@ public class MainMenu {
                 "\n\nSelect :\n" +
                 "\tS: Student menu\n" +
                 "\tU: Subject menu\n" +
+                "\tE: Enrolments menu\n" +
                 "\n\tQ: quit\n" +
                 "\n" +
                 "Selection : "
