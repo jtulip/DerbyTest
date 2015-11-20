@@ -51,7 +51,8 @@ public class MainMenu {
     private static void displayMenu() {
         System.out.print(                
                 "\n\nSelect :\n" +
-                "\tS: student menu\n" +
+                "\tS: Student menu\n" +
+                "\tU: Subject menu\n" +
                 "\n\tQ: quit\n" +
                 "\n" +
                 "Selection : "
