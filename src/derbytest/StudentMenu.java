@@ -73,7 +73,7 @@ public class StudentMenu {
  
     
 	/**
-	 * Creates a new record in the Students table
+	 * Create a new Student record 
 	 * 
 	 * @throws SQLException
 	 */
@@ -101,7 +101,7 @@ public class StudentMenu {
     
     
     /**
-     * Read a student from a row in the table
+     * Read a student
      * 
      * @throws SQLException
      */
@@ -124,7 +124,9 @@ public class StudentMenu {
     
     
     /**
-     * Update a student. Only first name and last name may be changed.
+     * Update a student. 
+	 * <p>	
+	 * Only first name and last name may be changed.
      * 
      * @throws SQLException
      */
@@ -292,7 +294,7 @@ public class StudentMenu {
     
     
    /**
-     * Internal utility method to display subject header line
+     * Internal utility method to display student header line
      * 
      */   
     private static void displayStudentHeader() {
@@ -302,7 +304,7 @@ public class StudentMenu {
 
     
     /**
-     * Internal utility method to display subject header line
+     * Internal utility method to display a student's data fields
      * 
      */   
     private static void displayStudent(int studentId, String firstName, String lastName) {

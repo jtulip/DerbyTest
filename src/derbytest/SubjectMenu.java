@@ -99,7 +99,7 @@ public class SubjectMenu {
     
 
     /**
-     * Read a subject from a row in the table
+     * Read a subject
      * 
      * @throws SQLException
      */
@@ -122,7 +122,9 @@ public class SubjectMenu {
     
     
     /**
-     * Update a subject. Only subject name may be changed.
+     * Update a subject. 
+     * <p>
+     * Only subject name may be changed.
      * 
      * @throws SQLException
      */
@@ -268,7 +270,7 @@ public class SubjectMenu {
 
     
     /**
-     * Internal utility method to display subject header line
+     * Internal utility method to display a subject's data fields
      * 
      */   
     private static void displaySubject(String subjectCode, String subjectName) {
