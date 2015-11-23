@@ -72,125 +72,6 @@ public class StudentMenu {
 
  
     
-    /**
-     * Delete a student. 
-     * 
-     * @throws SQLException
-     */
-    private static void delete() throws IOException, SQLException {
-        //get student id
-        int sid = getStudentId();
-                
-        String raw = String.format("DELETE FROM Students WHERE StudentId = %d", sid);
-        try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(); ) {
-        	
-        	sta.execute(raw);
-        }        
-    }
-
-    
-    
-    /**
-     * Update a student. Only first name and last name may be changed.
-     * 
-     * @throws SQLException
-     */
-    private static void update() throws IOException, SQLException {
-        //get student id
-        int sid = getStudentId();
-                
-        String raw = String.format("SELECT * FROM Students WHERE StudentId = %d", sid);
-        try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery(raw); ) {
-        
-			if (res.next()) {
-				System.out.println("\nOriginal record: ");
-				System.out.println(String.format("\n\t%s\t%s\t%s", "StudentId", "FirstName","LastName"));
-				System.out.println(String.format("\t%d\t\t%s\t\t%s", 
-						res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName")));
-			}
-        	else {
-        		System.out.println(String.format("No such student: %d", sid));
-        		return;
-        	}
-        }
-        
-        //get new first name
-        String fname = getFirstName();
-        //get new last name
-        String lname = getLastName();
-        
-        //update record
-        raw = String.format("UPDATE Students SET FirstName='%s', LastName='%s' WHERE StudentId=%d", fname, lname, sid);
-        try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(); ) {
-        
-            sta.execute(raw);
-        }
-
-        raw = String.format("SELECT * FROM Students WHERE StudentId = %d", sid);
-        try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery(raw); ) {
-        
-			if (res.next()) {
-				System.out.println("\nUpdated record: ");
-				System.out.println(String.format("\n\t%s\t%s\t%s", "StudentId", "FirstName","LastName"));
-				System.out.println(String.format("\t%d\t\t%s\t\t%s", 
-						res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName")));
-			}
-        }
-    }
-    
-
-    
-    /**
-     * Read a row in the table
-     * 
-     * @throws SQLException
-     */
-    private static void read() throws IOException, SQLException {
-        //get student id
-        int sid = getStudentId();
-        
-        String raw = String.format("SELECT * FROM Students WHERE StudentId = %d", sid);
-        try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery(raw); ) {
-        
-			System.out.println(String.format("\n\t%s\t%s\t%s", "StudentId", "FirstName","LastName"));
-			while (res.next()) {
-				System.out.println(String.format("\t%d\t\t%s\t\t%s", 
-						res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName")));
-			}
-        }
-    }
-    
-    
-    
-   /**
-    * Lists all rows in the table
-    * 
-    * @throws SQLException
-    */
-    private static void list() throws SQLException {
-    	String raw = String.format("SELECT * FROM Students");
-    	try (Connection con = ds_.getConnection();
-    			Statement sta = con.createStatement();
-    			ResultSet res = sta.executeQuery(raw); ) {
-   
-			System.out.println(String.format("\n\t%s\t%s\t%s", "StudentId", "FirstName","LastName"));
-			while (res.next()) {
-				System.out.println(String.format("\t%d\t\t%s\t\t%s", 
-						res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName")));
-			}
-    	}
-    }
-   
-   
-   
 	/**
 	 * Creates a new record in the Students table
 	 * 
@@ -220,6 +101,121 @@ public class StudentMenu {
     
     
     /**
+     * Read a student from a row in the table
+     * 
+     * @throws SQLException
+     */
+    private static void read() throws IOException, SQLException {
+        //get student id
+        int sid = getStudentId();
+        
+        String raw = String.format("SELECT * FROM Students WHERE StudentId = %d", sid);
+        try (Connection con = ds_.getConnection();
+             Statement sta = con.createStatement();
+             ResultSet res = sta.executeQuery(raw); ) {
+        
+        	displayStudentHeader();
+			while (res.next()) {
+				displayStudent(res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName"));
+			}
+        }
+    }
+    
+    
+    
+    /**
+     * Update a student. Only first name and last name may be changed.
+     * 
+     * @throws SQLException
+     */
+    private static void update() throws IOException, SQLException {
+        //get student id
+        int sid = getStudentId();
+                
+        String raw = String.format("SELECT * FROM Students WHERE StudentId = %d", sid);
+        try (Connection con = ds_.getConnection();
+             Statement sta = con.createStatement();
+             ResultSet res = sta.executeQuery(raw); ) {
+        
+			if (res.next()) {
+				System.out.println("\nOriginal record: ");
+	        	displayStudentHeader();
+				displayStudent(res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName"));
+			}
+        	else {
+        		System.out.println(String.format("No such student: %d", sid));
+        		return;
+        	}
+        }
+        
+        //get new first name
+        String fname = getFirstName();
+        //get new last name
+        String lname = getLastName();
+        
+        //update record
+        raw = String.format("UPDATE Students SET FirstName='%s', LastName='%s' WHERE StudentId=%d", fname, lname, sid);
+        try (Connection con = ds_.getConnection();
+             Statement sta = con.createStatement(); ) {
+        
+            sta.execute(raw);
+        }
+
+        raw = String.format("SELECT * FROM Students WHERE StudentId = %d", sid);
+        try (Connection con = ds_.getConnection();
+             Statement sta = con.createStatement();
+             ResultSet res = sta.executeQuery(raw); ) {
+        
+			if (res.next()) {
+				System.out.println("\nUpdated record: ");
+	        	displayStudentHeader();
+				displayStudent(res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName"));
+			}
+        }
+    }
+    
+
+    
+    /**
+     * Delete a student. 
+     * 
+     * @throws SQLException
+     */
+    private static void delete() throws IOException, SQLException {
+        //get student id
+        int sid = getStudentId();
+                
+        String raw = String.format("DELETE FROM Students WHERE StudentId = %d", sid);
+        try (Connection con = ds_.getConnection();
+             Statement sta = con.createStatement(); ) {
+        	
+        	sta.execute(raw);
+        }        
+    }
+
+    
+    
+   /**
+    * List all students
+    * 
+    * @throws SQLException
+    */
+    private static void list() throws SQLException {
+    	String raw = String.format("SELECT * FROM Students");
+    	try (Connection con = ds_.getConnection();
+    			Statement sta = con.createStatement();
+    			ResultSet res = sta.executeQuery(raw); ) {
+   
+    		displayStudentHeader();
+			while (res.next()) {
+				displayStudent(res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName"));
+			}
+    	}
+    }
+   
+   
+   
+    /**
      * Internal utility method to return a student ID
      * 
      * @throws IOException
@@ -227,7 +223,7 @@ public class StudentMenu {
      */   
     private static int getStudentId() throws IOException {
 	    //get student id
-	    System.out.print("Enter StudentID: ");
+	    System.out.print("\nEnter StudentID: ");
 	    int sid = 0;
 	    while ( sid <= 0 ) {
 	        try {
@@ -252,7 +248,7 @@ public class StudentMenu {
      * @return the student's first name
      */   
     private static String getFirstName() throws IOException {	    
-	    String fname = getName("Enter first name: ");
+	    String fname = getName("\nEnter first name: ");
 	    return fname;   
     }
     
@@ -265,7 +261,7 @@ public class StudentMenu {
      * @return the student's last name
      */   
     private static String getLastName() throws IOException {	    
-	    String lname = getName("Enter last name: ");
+	    String lname = getName("\nEnter last name: ");
 	    return lname;   
     }
     
@@ -292,5 +288,26 @@ public class StudentMenu {
 	    }
 	    return name;   
     }
+
+    
+    
+   /**
+     * Internal utility method to display subject header line
+     * 
+     */   
+    private static void displayStudentHeader() {
+    	System.out.println(String.format("\n\t%s\t%s\t%s", "StudentId", "FirstName","LastName"));
+    }
+    
+
+    
+    /**
+     * Internal utility method to display subject header line
+     * 
+     */   
+    private static void displayStudent(int studentId, String firstName, String lastName) {
+		System.out.println(String.format("\t%d\t\t%s\t\t%s", studentId, firstName, lastName));
+     }
+
     
 }
