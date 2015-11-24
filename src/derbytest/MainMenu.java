@@ -28,19 +28,22 @@ public class MainMenu {
                     
                     switch (ans.toUpperCase()) {
                     
-                    case "S": StudentMenu.execute(ds, in);
-                    break;  
-          
-                    case "U": SubjectMenu.execute(ds, in);
-                    break;  
-          
-                    case "E": EnrolmentMenu.execute(ds, in);
-                    break;  
-          
-                    case "Q": stop = true;
-                              break;
-                              
-                    default: System.out.println(String.format("%s not recognised", ans));
+	                    case "S": StudentMenu.execute(ds, in);
+	                              break;  
+	          
+	                    case "U": SubjectMenu.execute(ds, in);
+	                              break;  
+	          
+	                    case "E": EnrolmentMenu.execute(ds, in);
+                                  break;  
+    
+	                    case "A":AssessmentMenu.execute(ds, in);
+                                  break;  
+    
+	                    case "Q": stop = true;
+	                              break;
+	                              
+	                    default: System.out.println(String.format("%s not recognised", ans));
                     }
                 }
                 System.out.println("\nExiting.");
@@ -57,6 +60,7 @@ public class MainMenu {
                 "\tS: Student menu\n" +
                 "\tU: Subject menu\n" +
                 "\tE: Enrolments menu\n" +
+                "\tA: Assessments menu\n" +
                 "\n\tQ: quit\n" +
                 "\n" +
                 "Selection : "
