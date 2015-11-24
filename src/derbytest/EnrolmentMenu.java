@@ -88,10 +88,11 @@ public class EnrolmentMenu {
         //get student id
         int sid = getStudentId();
         
+        String raw = String.format("INSERT INTO Enrolments VALUES ('%s', %d)", sub, sid);
         try (Connection con = ds_.getConnection();
              Statement sta = con.createStatement(); ) {
         
-            sta.execute(String.format("INSERT INTO Enrolments VALUES ('%s', %d)", sub, sid));
+            sta.execute(raw);
         }
         catch (SQLIntegrityConstraintViolationException e) {
             System.out.print(String.format("Invalid Enrolment - studentId %d or subjectCode %s does not exist", sid, sub));            
@@ -157,9 +158,10 @@ public class EnrolmentMenu {
      * @throws SQLException
      */
     private static void list() throws SQLException {
+    	String raw = String.format("SELECT * FROM Enrolments");
         try (Connection con = ds_.getConnection();
              Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery( "SELECT * FROM Enrolments"); ) {
+             ResultSet res = sta.executeQuery(raw); ) {
         
         	displayEnrolmentHeader();
 			while (res.next()) {
@@ -179,9 +181,10 @@ public class EnrolmentMenu {
         //get subject code
         String sub = getSubjectCode();
         
+        String raw = String.format("SELECT * FROM Enrolments WHERE SubjectCode = '%s'", sub);
         try (Connection con = ds_.getConnection();
              Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery( String.format("SELECT * FROM Enrolments WHERE SubjectCode = '%s'", sub)); ) {
+             ResultSet res = sta.executeQuery(raw); ) {
         
 
         	displayEnrolmentHeader();
@@ -202,9 +205,10 @@ public class EnrolmentMenu {
         //get student id
         int sid = getStudentId();
         
+        String raw = String.format("SELECT * FROM Enrolments WHERE StudentId = %d", sid);
         try (Connection con = ds_.getConnection();
              Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery( String.format("SELECT * FROM Enrolments WHERE StudentId = %d", sid)); ) {
+             ResultSet res = sta.executeQuery(raw); ) {
         
         	displayEnrolmentHeader();
 			while (res.next()) {
