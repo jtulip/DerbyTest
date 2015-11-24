@@ -231,7 +231,7 @@ public class SubjectMenu {
 	            break;
 	        }
 	    }
-	    return sub;
+	    return sub.toUpperCase();
     }
 
     
