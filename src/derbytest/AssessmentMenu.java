@@ -251,7 +251,7 @@ public class AssessmentMenu {
      * Internal utility method to return an assessment code
      * 
      * @throws IOException
-     * @return the subject code
+     * @return the assessment code
      */   
     private static String getAssessmentCode() throws IOException {
 	    System.out.print("\nEnter Assessment Code: ");
@@ -265,7 +265,7 @@ public class AssessmentMenu {
 	            break;
 	        }
 	    }
-	    return ass.toUpperCase();
+	    return ass;
     }
 
     
