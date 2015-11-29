@@ -101,7 +101,7 @@ public class MarkMenu {
         String raw = "INSERT INTO Marks VALUES (?, '?', '?', ?)";
         //String raw = String.format("INSERT INTO Marks VALUES (%d, '%s', '%s', %d)", sid, sub, ass, mark);
         try (Connection con = ds_.getConnection();
-             PreparedStatement pstmt = con.prepareStatement(raw); ) {
+             PreparedStatement pstmt = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
         	pstmt.setInt(1, sid);
         	pstmt.setString(2, sub);
         	pstmt.setString(3, ass);
@@ -132,10 +132,10 @@ public class MarkMenu {
         
         String raw = String.format("SELECT * FROM Marks WHERE (StudentId = %d) AND (SubjectCode = '%s') AND (AssessmentCode = '%s')", sid, sub, ass);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
+             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
              ResultSet res = sta.executeQuery(raw); ) {
         
-			if (!res.isBeforeFirst()) {
+			if (res.next()) {
 	        	displayResults(res);
 			}
         	else {
@@ -170,10 +170,10 @@ public class MarkMenu {
         //display original record
         String raw = String.format("SELECT * FROM Marks WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", sid, sub, ass);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
+             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
              ResultSet res = sta.executeQuery(raw); ) {
         
-			if (!res.isBeforeFirst()) {
+			if (res.next()) {
 				System.out.println("\nOriginal record: ");				
 	        	displayResults(res);
 			}
@@ -186,7 +186,7 @@ public class MarkMenu {
         //update record
         raw = String.format("UPDATE Marks SET Mark = %d WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", mark, sid, sub, ass);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(); ) {
+             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
         
             sta.execute(raw);
         }
@@ -194,7 +194,7 @@ public class MarkMenu {
         //display updated record
         raw = String.format("SELECT * FROM Marks WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", sid, sub, ass);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
+             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
              ResultSet res = sta.executeQuery(raw); ) {
         
 			if (res.next()) {
@@ -223,7 +223,7 @@ public class MarkMenu {
         
         String raw = String.format("DELETE FROM Marks WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", sid, sub, ass);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(); ) {
+             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
         
         	sta.execute(raw);
         }
@@ -239,7 +239,7 @@ public class MarkMenu {
     private static void list() throws SQLException {
     	String raw = String.format("SELECT * FROM Marks");
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
+             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
              ResultSet res = sta.executeQuery(raw); ) {
         
         	displayResults(res);
@@ -259,9 +259,10 @@ public class MarkMenu {
         
         String raw = String.format("SELECT * FROM Marks WHERE SubjectCode = '%s'", sub);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
+             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
              ResultSet res = sta.executeQuery(raw); ) {        
 
+        	res.next();
         	displayResults(res);
         }
     }
@@ -279,9 +280,10 @@ public class MarkMenu {
         
         String raw = String.format("SELECT * FROM Marks WHERE StudentId = %d", sid);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
+             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
              ResultSet res = sta.executeQuery(raw); ) {
         	
+        	res.next();
         	displayResults(res);
         
         }
@@ -413,17 +415,13 @@ public class MarkMenu {
      * 
      */   
     private static void displayResults(ResultSet res) throws SQLException {
-		if (res.next()) {
-	    	System.out.println(String.format("\n\t%s\t%s\t%s\t%s", 
-	    			"StudentId", "SubjectCode", "AssessmentCode", "Mark"));
-			do {
-				System.out.println(String.format("\t%d\t\t%s\t\t%s\t\t%d", res.getInt("StudentId"), 
-						res.getString("SubjectCode"), res.getString("AssessmentCode"), res.getInt("Mark")));
-			} while (res.next());
-		}
-		else {
-			System.out.println("No such mark");
-		}
-    }
+    	res.first();
+    	System.out.println(String.format("\n\t%s\t%s\t%s\t%s", 
+    			"StudentId", "SubjectCode", "AssessmentCode", "Mark"));
+		do {
+			System.out.println(String.format("\t%d\t\t%s\t\t%s\t\t%d", res.getInt("StudentId"), 
+					res.getString("SubjectCode"), res.getString("AssessmentCode"), res.getInt("Mark")));
+		} while (res.next());
+	}
 
 }

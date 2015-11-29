@@ -40,7 +40,7 @@ ALTER TABLE Enrolments
 ALTER TABLE Enrolments
 	ADD CONSTRAINT Enrol_Students_fk FOREIGN KEY (StudentId) 
 		REFERENCES Students (StudentId)
-		ON DELETE CASCADE;;
+		ON DELETE CASCADE;
 
 	
 

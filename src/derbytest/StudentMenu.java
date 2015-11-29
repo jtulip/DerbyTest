@@ -27,6 +27,7 @@ public class StudentMenu {
                         "\tU: update Student\n" +
                         "\tD: delete Student\n" +
                         "\tL: list all Students\n" +
+                        "\tG: calculate Student grades\n" +
                         "\n\tX: return to main\n" +
                 "\n" +
                 "Selection : "
@@ -55,7 +56,10 @@ public class StudentMenu {
 	                		  break;
 	      
                     case "L": list();
-                              break;  
+                    break;  
+                    
+                    case "G": calcGrade();
+                    break;  
                     
                     case "X": stop = true;
                               break;
@@ -197,26 +201,90 @@ public class StudentMenu {
 
     
     
-   /**
-    * List all students
-    * 
-    * @throws SQLException
-    */
-    private static void list() throws SQLException {
-    	String raw = String.format("SELECT * FROM Students");
-    	try (Connection con = ds_.getConnection();
-    			Statement sta = con.createStatement();
-    			ResultSet res = sta.executeQuery(raw); ) {
-   
-    		displayStudentHeader();
-			while (res.next()) {
-				displayStudent(res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName"));
-			}
-    	}
+    /**
+     * List all students
+     * 
+     * @throws SQLException
+     */
+     private static void list() throws SQLException {
+     	String raw = String.format("SELECT * FROM Students");
+     	try (Connection con = ds_.getConnection();
+     			Statement sta = con.createStatement();
+     			ResultSet res = sta.executeQuery(raw); ) {
+    
+     		displayStudentHeader();
+ 			while (res.next()) {
+ 				displayStudent(res.getInt("StudentId"), res.getString("FirstName"), res.getString("LastName"));
+ 			}
+     	}
+     }
+    
+    
+    
+     /**
+      * Calculate a student's grades
+      * 
+      * @throws SQLException
+      */
+    private static void calcGrade() throws IOException, SQLException {
+          //get student id
+          int sid = getStudentId();
+                  
+          
+      	String raw1 = String.format("SELECT SubjectCode FROM Enrolments where StudentId = %d", sid);
+      	try (Connection con = ds_.getConnection();
+      			Statement sta1 = con.createStatement();
+      			ResultSet res1 = sta1.executeQuery(raw1); ) {
+     
+  			while (res1.next()) {
+  				String sub = res1.getString("SubjectCode");
+  				String raw2 = String.format("SELECT Marks.AssessmentCode, Marks.Mark, Assessments.AssessmentWeight " +
+  	                "FROM Marks, Assessments " +
+  	                "WHERE Marks.SubjectCode = Assessments.SubjectCode " +
+  	                    "AND Marks.AssessmentCode = Assessments.AssessmentCode " +
+  	                    "AND Marks.StudentId = %d " +
+  	                    "AND Marks.SubjectCode='%s' " +
+  	                    "ORDER BY Marks.AssessmentCode ", sid, sub);
+	  	      	try (Statement sta2 = con.createStatement();
+	  	      			ResultSet res2 = sta2.executeQuery(raw2);) {
+	  	      		
+	  	      		java.util.ArrayList<String> codes = new java.util.ArrayList<String>();
+	  	      		java.util.ArrayList<Float> marks = new java.util.ArrayList<Float>();
+	  	      		java.util.ArrayList<Integer> weights = new java.util.ArrayList<Integer>();
+	  	      		
+	  	      		float totalWeight = 0;
+	  	      		
+	  	  			while (res2.next()) {
+		  	      		codes.add(res2.getString("AssessmentCode"));
+		  	      		marks.add(res2.getFloat("Mark"));
+		  	      		weights.add(res2.getInt("AssessmentWeight"));
+		  	      		totalWeight += weights.get(weights.size()-1);
+	  	  			}
+	  	  			java.util.Iterator<Float> markIter = marks.iterator();
+	  	  			java.util.Iterator<Integer> weightIter = weights.iterator();
+
+	  				System.out.println(String.format("%s\t%5.1f", sub, totalWeight));
+
+	  	  			float totalMarks = 0.0f;
+	  	  			for (String code : codes) {
+	  	  				float mark = markIter.next();
+	  	  				float weight = weightIter.next();
+	  	  				float markFrac = mark / 100;
+	  	  				float realMark = markFrac * weight;
+	  	  				totalMarks += realMark;
+	  	  				
+		  	      		System.out.println(String.format("%s\t%5.2f\t%5.2f\t%5.2f\t%5.1f", 
+		  	      				                        code, mark, markFrac, weight, realMark));
+	  	  			}
+	  	  			System.out.println(String.format("Total marks: %5.1f, Out of: %5.1f = %5.1f%%", totalMarks, totalWeight, totalMarks/totalWeight*100 ));
+	  	      	}	  	          
+  			}
+  			System.out.println("\n\n");
+      	}
     }
-   
-   
-   
+    
+     
+     
     /**
      * Internal utility method to return a student ID
      * 
