@@ -62,7 +62,7 @@ CREATE TABLE Marks
 		StudentId integer NOT NULL,
 		SubjectCode character(6) NOT NULL,
 		AssessmentCode character(4) NOT NULL,
-		Mark integer
+		Mark float DEFAULT 0.0
 	);
 ALTER TABLE Marks
 	ADD CONSTRAINT pk_Marks PRIMARY KEY (StudentId, SubjectCode, AssessmentCode);
@@ -71,23 +71,64 @@ ALTER TABLE Marks
 ALTER TABLE Marks
 	ADD CONSTRAINT Assessments_fk FOREIGN KEY (SubjectCode, AssessmentCode) 
 		REFERENCES Assessments (SubjectCode, AssessmentCode);
+ALTER TABLE Marks
+	ADD CONSTRAINT Mark_In_Range CHECK (Mark >= 0.0 AND Mark <= 100.0);
 
 
 -- /* Insert test data */
 
 INSERT INTO Subjects VALUES 
-	('ITC203','OOSAD'), 
-	('ITC205','PPP');
+	('ITC203','Object Oriented Systems and Deesign'), 
+	('ITC205','Professional Programming Practice'),
+	('ITC303','Software Development Project 1');
 	
 INSERT INTO Students VALUES 
 	(1,'Jim', 'Brown'), 
 	(2, 'Jack', 'Black'), 
-	(3, 'Mary', 'Contrary');
+	(3, 'Mary', 'Contrary'),
+	(4, 'Fred', 'Nurke'),
+	(5, 'Edward', 'Seagoon');
 	
 INSERT INTO Enrolments VALUES 
 	('ITC203',1), 
 	('ITC203',3), 
+	('ITC203',4),
+	('ITC203',5),
+	('ITC205',1),
 	('ITC205',2),
-	('ITC205',3);
+	('ITC205',4),
+	('ITC205',5),
+	('ITC303',3),
+	('ITC303',5),
+	('ITC303',2);
 	
+INSERT INTO Assessments VALUES 
+	('ITC203','Asg1',25), 
+	('ITC203','Asg2',25), 
+	('ITC203','Asg3',25),
+	('ITC203','Prac',25),
+	('ITC205','Asg1',30),
+	('ITC205','Asg2',30),
+	('ITC205','Exam',40),
+	('ITC303','IOCM',25),
+	('ITC303','PREM',25),
+	('ITC303','PMAS',25);
+
+INSERT INTO Marks VALUES 
+	(1,'ITC203','Asg1',0), 
+	(1,'ITC203','Asg2',0), 
+	(1,'ITC203','Asg3',0), 
+	(1,'ITC203','Prac',0),
+	(4,'ITC203','Asg1',0), 
+	(4,'ITC203','Asg2',0), 
+	(4,'ITC203','Asg3',0), 
+	(4,'ITC203','Prac',0),
+	(5,'ITC203','Asg1',0), 
+	(5,'ITC203','Asg2',0), 
+	(5,'ITC203','Asg3',0), 
+	(5,'ITC203','Prac',0),
+	(3,'ITC203','Asg1',0), 
+	(3,'ITC203','Asg2',0), 
+	(3,'ITC203','Asg3',0), 
+	(3,'ITC203','Prac',0);
 

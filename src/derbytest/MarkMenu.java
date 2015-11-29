@@ -98,11 +98,15 @@ public class MarkMenu {
         //get actual mark
         int mark = getMark();
         
-        String raw = String.format("INSERT INTO Marks VALUES (%d, '%s', '%s', %d)", sid, sub, ass, mark);
+        String raw = "INSERT INTO Marks VALUES (?, '?', '?', ?)";
+        //String raw = String.format("INSERT INTO Marks VALUES (%d, '%s', '%s', %d)", sid, sub, ass, mark);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(); ) {
-        
-            sta.execute(raw);
+             PreparedStatement pstmt = con.prepareStatement(raw); ) {
+        	pstmt.setInt(1, sid);
+        	pstmt.setString(2, sub);
+        	pstmt.setString(3, ass);
+        	pstmt.setInt(4, mark);
+            pstmt.execute();
         }
         catch (SQLIntegrityConstraintViolationException e) {
             System.out.print(String.format("Invalid Mark - studentId %d, subjectCode %s, or assessment code %s does not exist", sid, sub, ass));            

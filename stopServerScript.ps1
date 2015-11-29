@@ -1,1 +1,0 @@
-java -jar $env:DERBY_HOME\lib\derbyrun.jar server shutdown >> server.log
