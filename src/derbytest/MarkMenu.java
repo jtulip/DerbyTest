@@ -242,7 +242,7 @@ public class MarkMenu {
         //get assessment code
         String ass = Utility.getAssessmentCode(in_);
         
-        String raw = String.format("DELETE FROM Marks WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?", sid, sub, ass);
+        String raw = "DELETE FROM Marks WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?";
         try (Connection con = ds_.getConnection();
              PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
     		
@@ -283,7 +283,7 @@ public class MarkMenu {
         //get subject code
         String sub = Utility.getSubjectCode(in_);
         
-        String raw = "SELECT * FROM Marks WHERE SubjectCode = ?";
+        String raw = "SELECT * FROM Marks WHERE SubjectCode = ? ORDER BY StudentId, AssessmentCode";
         try (Connection con = ds_.getConnection();
              PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
         	
@@ -306,7 +306,7 @@ public class MarkMenu {
         //get student id
         int sid = Utility.getStudentId(in_);
         
-        String raw = "SELECT * FROM Marks WHERE StudentId = ?";
+        String raw = "SELECT * FROM Marks WHERE StudentId = ? ORDER BY SubjectCode, AssessmentCode";
         try (Connection con = ds_.getConnection();
              PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
         	

@@ -88,11 +88,14 @@ public class EnrolmentMenu {
         //get student id
         int sid = Utility.getStudentId(in_);
         
-        String raw = String.format("INSERT INTO Enrolments VALUES ('%s', %d)", sub, sid);
+        String raw = "INSERT INTO Enrolments VALUES (?, ?)";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(); ) {
-        
-            sta.execute(raw);
+                PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
+                		
+    		  	sta.setString(1, sub);
+    		  	sta.setInt(2, sid);
+                  		
+            	sta.execute();
         }
         catch (SQLIntegrityConstraintViolationException e) {
             System.out.print(String.format("Invalid Enrolment - studentId %d or subjectCode %s does not exist", sid, sub));            
@@ -113,14 +116,17 @@ public class EnrolmentMenu {
         //get student id
         int sid = Utility.getStudentId(in_);
                
-        String raw = String.format("SELECT * FROM Enrolments WHERE (SubjectCode = '%s') AND (StudentId = %d)", sub, sid);
+        String raw = "SELECT * FROM Enrolments WHERE (SubjectCode = ?) AND (StudentId = ?)";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery(raw); ) {
+                PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
         
+		  	sta.setString(1, sub);
+		  	sta.setInt(2, sid);
+		  	
+            ResultSet res = sta.executeQuery(); 
+            
 			if (res.next()) {
-	        	displayEnrolmentHeader();
-				displayEnrolment(res.getString("SubjectCode"), res.getInt("StudentId"));
+	        	displayResults(res);
 			}
 			else {
 				System.out.println("No such enrolment");
@@ -142,11 +148,14 @@ public class EnrolmentMenu {
         //get student id
         int sid = Utility.getStudentId(in_);
         
-        String raw = String.format("DELETE FROM Enrolments WHERE (SubjectCode = '%s') AND (StudentId = %d)", sub, sid);
+        String raw = "DELETE FROM Enrolments WHERE (SubjectCode = ?) AND (StudentId = ?)";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(); ) {
-        
-        	sta.execute(raw);
+                PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
+            
+		  	sta.setString(1, sub);
+		  	sta.setInt(2, sid);
+		  	
+            sta.execute(); 
         }
     }
 
@@ -158,14 +167,14 @@ public class EnrolmentMenu {
      * @throws SQLException
      */
     private static void list() throws SQLException {
-    	String raw = String.format("SELECT * FROM Enrolments");
+    	String raw = String.format("SELECT * FROM Enrolments ORDER BY StudentId, SubjectCode");
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery(raw); ) {
+                PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
+        	
+             ResultSet res = sta.executeQuery();
         
-        	displayEnrolmentHeader();
-			while (res.next()) {
-				displayEnrolment(res.getString("SubjectCode"), res.getInt("StudentId"));
+			if (res.next()) {
+				displayResults(res);
 			}
         }
     }
@@ -181,15 +190,16 @@ public class EnrolmentMenu {
         //get subject code
         String sub = Utility.getSubjectCode(in_);
         
-        String raw = String.format("SELECT * FROM Enrolments WHERE SubjectCode = '%s'", sub);
+        String raw = "SELECT * FROM Enrolments WHERE SubjectCode = ?";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery(raw); ) {
-        
+                PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
+        	
+		  	sta.setString(1, sub);
 
-        	displayEnrolmentHeader();
-        	while (res.next()) {
-        		displayEnrolment(res.getString("SubjectCode"), res.getInt("StudentId"));
+		  	ResultSet res = sta.executeQuery();
+        
+        	if (res.next()) {
+				displayResults(res);
             }
         }
     }
@@ -205,14 +215,16 @@ public class EnrolmentMenu {
         //get student id
         int sid = Utility.getStudentId(in_);
         
-        String raw = String.format("SELECT * FROM Enrolments WHERE StudentId = %d", sid);
+        String raw = String.format("SELECT * FROM Enrolments WHERE StudentId = ?", sid);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement();
-             ResultSet res = sta.executeQuery(raw); ) {
+                PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
+        	
+		  	sta.setInt(1, sid);
+
+		  	ResultSet res = sta.executeQuery();
         
-        	displayEnrolmentHeader();
-			while (res.next()) {
-				displayEnrolment(res.getString("SubjectCode"), res.getInt("StudentId"));
+		  	if (res.next()) {
+				displayResults(res);
 			}
         }
     }
@@ -220,21 +232,16 @@ public class EnrolmentMenu {
     
     
     /**
-     * Internal utility method to display enrolment header line
+     * Internal utility method to display a query's results
      * 
+     * @throws SQLException
      */   
-    private static void displayEnrolmentHeader() {
+    private static void displayResults(ResultSet res) throws SQLException {
+    	res.first();
     	System.out.println(String.format("\n\t%s\t%s", "SubjectCode","StudentId"));
-    }
-
-
-    
-    /**
-     * Internal utility method to display an enrolment's data fields
-     * 
-     */   
-    private static void displayEnrolment(String subjectCode, int studentId) {
-		System.out.println(String.format("\t%s\t\t%d", subjectCode, studentId));
-     }
+		do {
+			System.out.println(String.format("\t%s\t\t%d", res.getString("SubjectCode"), res.getInt("StudentId"))); 
+		} while (res.next());
+	}
 
 }
