@@ -83,10 +83,10 @@ public class EnrolmentMenu {
      */
     private static void create() throws IOException, SQLException {        
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
         
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
         
         String raw = String.format("INSERT INTO Enrolments VALUES ('%s', %d)", sub, sid);
         try (Connection con = ds_.getConnection();
@@ -108,10 +108,10 @@ public class EnrolmentMenu {
      */
     private static void read() throws IOException, SQLException {
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
 
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
                
         String raw = String.format("SELECT * FROM Enrolments WHERE (SubjectCode = '%s') AND (StudentId = %d)", sub, sid);
         try (Connection con = ds_.getConnection();
@@ -137,10 +137,10 @@ public class EnrolmentMenu {
      */
     private static void delete() throws IOException, SQLException {
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
         
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
         
         String raw = String.format("DELETE FROM Enrolments WHERE (SubjectCode = '%s') AND (StudentId = %d)", sub, sid);
         try (Connection con = ds_.getConnection();
@@ -179,7 +179,7 @@ public class EnrolmentMenu {
      */
     private static void listEnrolmentsBySubject() throws IOException, SQLException {
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
         
         String raw = String.format("SELECT * FROM Enrolments WHERE SubjectCode = '%s'", sub);
         try (Connection con = ds_.getConnection();
@@ -203,7 +203,7 @@ public class EnrolmentMenu {
      */
     private static void listEnrolmentsByStudent() throws IOException, SQLException {
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
         
         String raw = String.format("SELECT * FROM Enrolments WHERE StudentId = %d", sid);
         try (Connection con = ds_.getConnection();
@@ -215,55 +215,6 @@ public class EnrolmentMenu {
 				displayEnrolment(res.getString("SubjectCode"), res.getInt("StudentId"));
 			}
         }
-    }
-
-    
-    
-    /**
-     * Internal utility method to return a student ID
-     * 
-     * @throws IOException
-     * @return the student id
-     */   
-    private static int getStudentId() throws IOException {
-	    //get student id
-	    System.out.print("\nEnter StudentID: ");
-	    int sid = 0;
-	    while ( sid <= 0 ) {
-	        try {
-	            sid = Integer.parseInt(in_.readLine());
-	            if (sid <= 0 ) {
-	                System.out.println("Invalid input - id must be integer > 0");
-	            }
-	        }
-	        catch (NumberFormatException nfe) {
-	            System.out.println("Invalid input - id must be integer > 0");
-	        }
-	    }
-	    return sid;
-    }
-
-    
-    
-    /**
-     * Internal utility method to return a subject code
-     * 
-     * @throws IOException
-     * @return the subject code
-     */   
-    private static String getSubjectCode() throws IOException {
-	    System.out.print("\nEnter Subject Code: ");
-	    String sub = "";
-	    while (true) {
-	        sub = in_.readLine().trim();
-	        if ( sub.length() != 6 || !sub.matches("[a-zA-Z][a-zA-Z][a-zA-Z][1-9][0-9][0-9]")) {
-	            System.out.println("Invalid input - subject code must have length 6, first 3 characters alpha, last 3 characters numeric");
-	        }
-	        else {
-	            break;
-	        }
-	    }
-	    return sub.toUpperCase();
     }
     
     

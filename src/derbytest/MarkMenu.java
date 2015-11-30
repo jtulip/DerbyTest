@@ -98,15 +98,17 @@ public class MarkMenu {
         //get actual mark
         int mark = getMark();
         
-        String raw = "INSERT INTO Marks VALUES (?, '?', '?', ?)";
+        String raw = "INSERT INTO Marks VALUES (?, ?, ?, ?)";
         //String raw = String.format("INSERT INTO Marks VALUES (%d, '%s', '%s', %d)", sid, sub, ass, mark);
         try (Connection con = ds_.getConnection();
-             PreparedStatement pstmt = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
-        	pstmt.setInt(1, sid);
-        	pstmt.setString(2, sub);
-        	pstmt.setString(3, ass);
-        	pstmt.setInt(4, mark);
-            pstmt.execute();
+             PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
+        	
+        	sta.setInt(1, sid);
+        	sta.setString(2, sub);
+        	sta.setString(3, ass);
+        	sta.setInt(4, mark);
+        	
+            sta.execute();
         }
         catch (SQLIntegrityConstraintViolationException e) {
             System.out.print(String.format("Invalid Mark - studentId %d, subjectCode %s, or assessment code %s does not exist", sid, sub, ass));            
@@ -130,10 +132,15 @@ public class MarkMenu {
         //get assessment code
         String ass = getAssessmentCode();
         
-        String raw = String.format("SELECT * FROM Marks WHERE (StudentId = %d) AND (SubjectCode = '%s') AND (AssessmentCode = '%s')", sid, sub, ass);
+        String raw = "SELECT * FROM Marks WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-             ResultSet res = sta.executeQuery(raw); ) {
+             PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+        		
+        	sta.setInt(1, sid);
+        	sta.setString(2, sub);
+        	sta.setString(3, ass);
+        		
+            ResultSet res = sta.executeQuery(); 
         
 			if (res.next()) {
 	        	displayResults(res);
@@ -150,10 +157,10 @@ public class MarkMenu {
     /**
      * Update a mark. 
 	 * <p>	
-	 * Only actual mark vlaue may be changed.
+	 * Only actual mark value may be changed.
      * 
-     * @throws SQLException
-     */
+     * @throws IOException, SQLException
+      */
     private static void update() throws IOException, SQLException {
         //get student id
         int sid = getStudentId();
@@ -168,10 +175,15 @@ public class MarkMenu {
         int mark = getMark();
         
         //display original record
-        String raw = String.format("SELECT * FROM Marks WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", sid, sub, ass);
+        String raw = "SELECT * FROM Marks WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-             ResultSet res = sta.executeQuery(raw); ) {
+             PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+    		
+           	sta.setInt(1, sid);
+           	sta.setString(2, sub);
+           	sta.setString(3, ass);
+           		
+            ResultSet res = sta.executeQuery(); 
         
 			if (res.next()) {
 				System.out.println("\nOriginal record: ");				
@@ -184,19 +196,29 @@ public class MarkMenu {
         }
         
         //update record
-        raw = String.format("UPDATE Marks SET Mark = %d WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", mark, sid, sub, ass);
+        raw = "UPDATE Marks SET Mark = ? WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
+             PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+    		
+           	sta.setInt(1, mark);
+           	sta.setInt(2, sid);
+           	sta.setString(3, sub);
+           	sta.setString(4, ass);
         
-            sta.execute(raw);
+            sta.execute();
         }
 
         //display updated record
-        raw = String.format("SELECT * FROM Marks WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", sid, sub, ass);
+        raw = "SELECT * FROM Marks WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-             ResultSet res = sta.executeQuery(raw); ) {
-        
+                PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+    		
+              	sta.setInt(1, sid);
+              	sta.setString(2, sub);
+              	sta.setString(3, ass);
+              		
+               ResultSet res = sta.executeQuery(); 
+                   
 			if (res.next()) {
 				System.out.println("\nUpdated record: ");
 	        	displayResults(res);
@@ -209,8 +231,8 @@ public class MarkMenu {
     /**
      * Delete a mark
      * 
-     * @throws SQLException
-     */
+     * @throws IOException, SQLException
+      */
     private static void delete() throws IOException, SQLException {
         //get student id
         int sid = getStudentId();
@@ -223,8 +245,12 @@ public class MarkMenu {
         
         String raw = String.format("DELETE FROM Marks WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", sid, sub, ass);
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
-        
+             PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
+    		
+		  	sta.setInt(1, sid);
+		  	sta.setString(2, sub);
+		  	sta.setString(3, ass);
+              		
         	sta.execute(raw);
         }
     }
@@ -239,9 +265,10 @@ public class MarkMenu {
     private static void list() throws SQLException {
     	String raw = String.format("SELECT * FROM Marks");
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-             ResultSet res = sta.executeQuery(raw); ) {
-        
+             PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
+        	
+        	ResultSet res = sta.executeQuery();
+        	
         	displayResults(res);
 		}
     }
@@ -251,18 +278,20 @@ public class MarkMenu {
     /**
      * Lists Marks by subject
      * 
-     * @throws SQLException
-     */
+     * @throws IOException, SQLException
+      */
     private static void listMarksBySubject() throws IOException, SQLException {
         //get subject code
         String sub = getSubjectCode();
         
-        String raw = String.format("SELECT * FROM Marks WHERE SubjectCode = '%s'", sub);
+        String raw = "SELECT * FROM Marks WHERE SubjectCode = ?";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-             ResultSet res = sta.executeQuery(raw); ) {        
+             PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+        	
+		  	sta.setString(1, sub);
 
-        	res.next();
+		  	ResultSet res = sta.executeQuery();
+
         	displayResults(res);
         }
     }
@@ -272,18 +301,20 @@ public class MarkMenu {
     /**
      * Lists Marks by student
      * 
-     * @throws SQLException
+     * @throws IOException, SQLException
      */
     private static void listMarksByStudent() throws IOException, SQLException {
         //get student id
         int sid = getStudentId();
         
-        String raw = String.format("SELECT * FROM Marks WHERE StudentId = %d", sid);
+        String raw = "SELECT * FROM Marks WHERE StudentId = ?";
         try (Connection con = ds_.getConnection();
-             Statement sta = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-             ResultSet res = sta.executeQuery(raw); ) {
+             PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
         	
-        	res.next();
+   		  	sta.setInt(1, sid);
+
+   		  	ResultSet res = sta.executeQuery();
+   		  	
         	displayResults(res);
         
         }
@@ -391,28 +422,9 @@ public class MarkMenu {
 
     
     /**
-     * Internal utility method to display mark header line
+     * Internal utility method to display a query's results
      * 
-     */   
-    private static void displayHeader() {
-    	System.out.println(String.format("\n\t%s\t%s\t%s\t%s", "StudentId", "SubjectCode", "Assessment Code", "Mark"));
-    }
-
-
-    
-    /**
-     * Internal utility method to display a mark's data fields
-     * 
-     */   
-    private static void displayMark(int studentId, String subjectCode, String assessmentCode, int mark ) {
-		System.out.println(String.format("\t%d\t%s\t%s\t%d", studentId, subjectCode, mark));
-     }
-
-    
-    
-    /**
-     * Internal utility method to display a queries results
-     * 
+     * @throws SQLException
      */   
     private static void displayResults(ResultSet res) throws SQLException {
     	res.first();
