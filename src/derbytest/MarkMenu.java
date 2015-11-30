@@ -87,19 +87,18 @@ public class MarkMenu {
      */
     private static void create() throws IOException, SQLException {        
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
         
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
         
         //get assessment code
-        String ass = getAssessmentCode();
+        String ass = Utility.getAssessmentCode(in_);
         
         //get actual mark
-        int mark = getMark();
+        int mark = Utility.getMark(in_);
         
         String raw = "INSERT INTO Marks VALUES (?, ?, ?, ?)";
-        //String raw = String.format("INSERT INTO Marks VALUES (%d, '%s', '%s', %d)", sid, sub, ass, mark);
         try (Connection con = ds_.getConnection();
              PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
         	
@@ -124,13 +123,13 @@ public class MarkMenu {
      */
     private static void read() throws IOException, SQLException {
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
         
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
         
         //get assessment code
-        String ass = getAssessmentCode();
+        String ass = Utility.getAssessmentCode(in_);
         
         String raw = "SELECT * FROM Marks WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?";
         try (Connection con = ds_.getConnection();
@@ -163,16 +162,16 @@ public class MarkMenu {
       */
     private static void update() throws IOException, SQLException {
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
                 
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
         
         //get assessment code
-        String ass = getAssessmentCode();
+        String ass = Utility.getAssessmentCode(in_);
         
         //get actual mark
-        int mark = getMark();
+        int mark = Utility.getMark(in_);
         
         //display original record
         String raw = "SELECT * FROM Marks WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?";
@@ -235,15 +234,15 @@ public class MarkMenu {
       */
     private static void delete() throws IOException, SQLException {
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
                 
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
         
         //get assessment code
-        String ass = getAssessmentCode();
+        String ass = Utility.getAssessmentCode(in_);
         
-        String raw = String.format("DELETE FROM Marks WHERE StudentId = %d AND SubjectCode = '%s' AND AssessmentCode = '%s'", sid, sub, ass);
+        String raw = String.format("DELETE FROM Marks WHERE StudentId = ? AND SubjectCode = ? AND AssessmentCode = ?", sid, sub, ass);
         try (Connection con = ds_.getConnection();
              PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
     		
@@ -251,7 +250,7 @@ public class MarkMenu {
 		  	sta.setString(2, sub);
 		  	sta.setString(3, ass);
               		
-        	sta.execute(raw);
+        	sta.execute();
         }
     }
 
@@ -263,7 +262,7 @@ public class MarkMenu {
      * @throws SQLException
      */
     private static void list() throws SQLException {
-    	String raw = String.format("SELECT * FROM Marks");
+    	String raw = String.format("SELECT * FROM Marks ORDER BY StudentId, SubjectCode, AssessmentCode");
         try (Connection con = ds_.getConnection();
              PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
         	
@@ -282,7 +281,7 @@ public class MarkMenu {
       */
     private static void listMarksBySubject() throws IOException, SQLException {
         //get subject code
-        String sub = getSubjectCode();
+        String sub = Utility.getSubjectCode(in_);
         
         String raw = "SELECT * FROM Marks WHERE SubjectCode = ?";
         try (Connection con = ds_.getConnection();
@@ -305,7 +304,7 @@ public class MarkMenu {
      */
     private static void listMarksByStudent() throws IOException, SQLException {
         //get student id
-        int sid = getStudentId();
+        int sid = Utility.getStudentId(in_);
         
         String raw = "SELECT * FROM Marks WHERE StudentId = ?";
         try (Connection con = ds_.getConnection();
@@ -315,111 +314,11 @@ public class MarkMenu {
 
    		  	ResultSet res = sta.executeQuery();
    		  	
-        	displayResults(res);
-        
+        	displayResults(res);        
         }
     }
 
     
-    
-    /**
-     * Internal utility method to return a student ID
-     * 
-     * @throws IOException
-     * @return the student id
-     */   
-    private static int getStudentId() throws IOException {
-	    //get student id
-	    System.out.print("\nEnter StudentID: ");
-	    int sid = 0;
-	    while ( sid <= 0 ) {
-	        try {
-	            sid = Integer.parseInt(in_.readLine());
-	            if (sid <= 0 ) {
-	                System.out.println("Invalid input - id must be integer > 0");
-	            }
-	        }
-	        catch (NumberFormatException nfe) {
-	            System.out.println("Invalid input - id must be integer > 0");
-	        }
-	    }
-	    return sid;
-    }
-
-    
-    
-    /**
-     * Internal utility method to return a mark
-     * 
-     * @throws IOException
-     * @return the student id
-     */   
-    private static int getMark() throws IOException {
-	    //get student id
-	    System.out.print("\nEnter Mark: ");
-	    int mark = 0;
-	    while ( mark <= 0 ) {
-	        try {
-	            mark = Integer.parseInt(in_.readLine());
-	            if (mark <= 0 ) {
-	                System.out.println("Invalid input - mark must be integer > 0");
-	            }
-	        }
-	        catch (NumberFormatException nfe) {
-	            System.out.println("Invalid input - mark must be integer > 0");
-	        }
-	    }
-	    return mark;
-    }
-
-    
-    
-    /**
-     * Internal utility method to return a subject code
-     * 
-     * @throws IOException
-     * @return the subject code
-     */   
-    private static String getSubjectCode() throws IOException {
-	    System.out.print("\nEnter Subject Code: ");
-	    String sub = "";
-	    while (true) {
-	        sub = in_.readLine().trim();
-	        if ( sub.length() != 6 || !sub.matches("[a-zA-Z][a-zA-Z][a-zA-Z][1-9][0-9][0-9]")) {
-	            System.out.println("Invalid input - subject code must have length 6," + 
-	                               " first 3 characters alpha, last 3 characters numeric");
-	        }
-	        else {
-	            break;
-	        }
-	    }
-	    return sub.toUpperCase();
-    }
-    
-    
-    
-    /**
-     * Internal utility method to return an assessment code
-     * 
-     * @throws IOException
-     * @return the assessment code
-     */   
-    private static String getAssessmentCode() throws IOException {
-	    System.out.print("\nEnter Assessment Code: ");
-	    String ass = "";
-	    while (true) {
-	        ass = in_.readLine().trim();
-	        if ( ass.length() != 4 || !ass.matches("[a-zA-Z][a-zA-Z][a-zA-Z][a-zA-Z0-9]")) {
-	            System.out.println("Invalid input - assessment code must have length 4," + 
-	                               " first 3 characters alpha, last character alphanumeric");
-	        }
-	        else {
-	            break;
-	        }
-	    }
-	    return ass;
-    }
-
     
     /**
      * Internal utility method to display a query's results
