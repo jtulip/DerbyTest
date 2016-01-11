@@ -215,7 +215,7 @@ public class EnrolmentMenu {
         //get student id
         int sid = Utility.getStudentId(in_);
         
-        String raw = String.format("SELECT * FROM Enrolments WHERE StudentId = ?", sid);
+        String raw = "SELECT * FROM Enrolments WHERE StudentId = ?";
         try (Connection con = ds_.getConnection();
                 PreparedStatement sta = con.prepareStatement(raw, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
         	
